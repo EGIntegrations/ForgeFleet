@@ -1,6 +1,7 @@
 import asyncio, json, os
 from redis.asyncio import Redis
 from agents import Agent, Runner, function_tool
+from tools.devtools import write_file, run_shell
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 redis = Redis.from_url(REDIS_URL)
@@ -12,8 +13,8 @@ def echo(text: str) -> str:
 
 demo_agent = Agent(
     name="DemoAgent",
-    instructions="Echo whatever the user sends.",
-    tools=[echo],
+    instructions="Use write_file or run_shell when appropriate.",
+    tools=[echo, write_file, run_shell],
 )
 
 QUEUE = "queue:DemoAgent"
