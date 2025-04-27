@@ -25,10 +25,10 @@ async def main() -> None:
         task = await redis.rpop(QUEUE)
         if task:
             message = task.decode()
-            print("INPUT  ▶", message, flush=True)**
+            print("INPUT  ▶", message, flush=True)
             await redis.publish(LOG, f"INPUT  ▶ {message}")
             result = await Runner.run(demo_agent, input=message)
-            print("OUTPUT ▶", result.final_output, flush=True)**
+            print("OUTPUT ▶", result.final_output, flush=True)
             await redis.publish(LOG, f"OUTPUT ▶ {result.final_output}")
         else:
             await asyncio.sleep(1)
