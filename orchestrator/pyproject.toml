@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "forgefleet-orchestrator"
+version = "0.1.0"
+description = ""
+authors = ["You"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+openai-agents-sdk = "*"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+psycopg2-binary = "*"
+pgvector = "*"
+redis = "*"
+pydantic = "*"
