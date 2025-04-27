@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir poetry && \
 
 # ---------- source code ----------
 # copy the actual packages *after* deps are installed
+COPY devtools_pb2*.py /app/
 COPY orchestrator /app/orchestrator
 COPY tools        /app/tools
 
