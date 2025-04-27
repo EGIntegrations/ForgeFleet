@@ -1,4 +1,5 @@
-import os, grpc, devtools_pb2 as pb, devtools_pb2_grpc as rpc
+import os, grpc
+from . import devtools_pb2 as pb, devtools_pb2_grpc as rpc
 
 _channel = grpc.insecure_channel(os.getenv("DEVTOOLS_ENDPOINT").replace("tcp://",""))
 _stub = rpc.DevToolsStub(_channel)
