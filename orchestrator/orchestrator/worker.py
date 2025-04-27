@@ -1,28 +1,35 @@
-import asyncio, os, logging
-from openai_agents import AgentRuntime, Agent
+import asyncio, json, os
 from redis.asyncio import Redis
-
-logging.basicConfig(level=logging.INFO)
+from agents import Agent, Runner, function_tool
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 redis = Redis.from_url(REDIS_URL)
 
-# --- example tool (stub) -----------------
-async def echo_tool(text: str) -> str:
+# ---- simple echo tool ---------------------
+@function_tool
+def echo(text: str) -> str:
     return text
 
-# --- simple agent ------------------------
 demo_agent = Agent(
     name="DemoAgent",
-    model="gpt-4o-mini",
-    system_prompt="You are a helpful demo agent; use the echo tool.",
-    tools=[echo_tool],
+    instructions="Echo whatever the user sends.",
+    tools=[echo],
 )
 
-async def main():
-    rt = AgentRuntime(redis=redis)
-    rt.register(demo_agent)
-    await rt.run()
+QUEUE = "queue:DemoAgent"
+LOG   = "logs:DemoAgent"
+
+async def main() -> None:
+    print("DemoAgent worker booted")
+    while True:
+        task = await redis.rpop(QUEUE)
+        if task:
+            message = task.decode()
+            await redis.publish(LOG, f"INPUT  ▶ {message}")
+            result = await Runner.run(demo_agent, input=message)
+            await redis.publish(LOG, f"OUTPUT ▶ {result.final_output}")
+        else:
+            await asyncio.sleep(1)
 
 if __name__ == "__main__":
     asyncio.run(main())
