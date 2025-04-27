@@ -6,7 +6,7 @@ authors = ["You"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-openai-agents-sdk = "*"
+openai-agents = "*"
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 psycopg2-binary = "*"
