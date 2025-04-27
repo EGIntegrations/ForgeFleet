@@ -1,5 +1,5 @@
 import asyncio, os, logging
-from agents_sdk import AgentRuntime, Agent
+from openai_agents import AgentRuntime, Agent
 from redis.asyncio import Redis
 
 logging.basicConfig(level=logging.INFO)
