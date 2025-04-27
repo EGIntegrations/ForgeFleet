@@ -1,9 +1,20 @@
+# orchestrator/Dockerfile
 FROM python:3.11-slim
 
+# ---------- deps ----------
 WORKDIR /app
-COPY pyproject.toml poetry.lock* /app/
-RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-root
+# copy Poetry files first to leverage Docker layer-cache
+COPY pyproject.toml poetry.lock* ./
+RUN pip install --no-cache-dir poetry && \
+    poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi --no-root
 
-COPY . /app
+# ---------- source code ----------
+# copy the actual packages *after* deps are installed
+COPY orchestrator /app/orchestrator
+COPY tools        /app/tools
+
+# make 'tools' importable
+ENV PYTHONPATH=/app
+
 CMD ["python", "-m", "orchestrator.worker"]
