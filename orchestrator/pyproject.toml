@@ -1,18 +1,24 @@
 [tool.poetry]
-packages = [{ include = "orchestrator" }]
 name = "forgefleet-orchestrator"
 version = "0.1.0"
-description = ""
+description = "ForgeFleet Orchestrator service"
 authors = ["You"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.10,<3.12"
+
+# Core dependencies
 openai-agents = "*"
 fastapi = "*"
-uvicorn = {extras = ["standard"], version = "*"}
-psycopg2-binary = "*"
-pgvector = "*"
+uvicorn = { extras = ["standard"], version = "*" }
 redis = "*"
 pydantic = "*"
-grpcio = "*"
-protobuf = "^4.25"
+
+# PostgreSQL and pgvector
+psycopg2-binary = "*"
+pgvector = "*"
+
+# gRPC toolchain
+grpcio = "1.72.0"
+grpcio-tools = "1.72.0"
+protobuf = ">=6.30.0"

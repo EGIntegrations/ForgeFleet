@@ -1,4 +1,4 @@
-forgefleet.localhost {
+:80 {
     reverse_proxy ui:8000
     encode gzip
 }

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+service DevTools {
+  rpc RunShell (ShellRequest) returns (ShellResponse);
+  rpc WriteFile (WriteFileRequest) returns (WriteFileResponse);
+}
+
+message ShellRequest  { string cmd  = 1; }
+message ShellResponse { string stdout = 1; string stderr = 2; int32 exit_code = 3; }
+
+message WriteFileRequest  { string path = 1; string content = 2; }
+message WriteFileResponse { bool ok = 1; }
