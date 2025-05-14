@@ -53,6 +53,19 @@ services:
       - db
       - redis
 
+  planner-orchestrator:
+    build:
+      context: ..
+      dockerfile: orchestrator/Dockerfile
+    image: infra-planner-orchestrator
+    command: ["python", "-m", "orchestrator.planner_expert"]
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - PLANNER_VECTOR_ID=${PLANNER_VECTOR_ID}
+      - PLANNER_AGENT_API_KEY=${PLANNER_AGENT_API_KEY}
+    depends_on:
+      - redis
+
   support-orchestrator:
     build:
       context: ../orchestrator
