@@ -1,0 +1,77 @@
+⸻
+
+ForgeFleet Agent Training Guide: GitHub
+
+Overview
+
+GitHub is a cloud-based platform that leverages Git, a distributed version control system, to facilitate collaboration among developers. It allows multiple contributors to work on projects simultaneously, track changes, and manage codebases efficiently. GitHub offers features such as repositories, branches, pull requests, issues, and actions to streamline the software development lifecycle.
+
+Core Concepts
+
+Repositories
+	•	Definition: A repository (repo) is a central location where all the files for a particular project are stored.
+	•	Usage: Repositories can be public or private and can contain folders, files, images, videos, spreadsheets, and data sets.
+	•	README: A markdown file that provides information about the project, including installation instructions, usage, and contribution guidelines.
+
+Branches
+	•	Definition: Branches are parallel versions of a repository.
+	•	Usage: They allow developers to work on different features or bug fixes simultaneously without affecting the main codebase.
+	•	Main Branch: The default branch where the source code of HEAD always reflects a production-ready state.
+
+Commits
+	•	Definition: Commits are snapshots of your repository at specific points in time.
+	•	Usage: Each commit has a unique ID and contains the changes made to the files, a message describing the changes, and metadata about the author. ￼
+
+Pull Requests (PRs)
+	•	Definition: Pull requests are proposed changes to a repository submitted by a contributor and reviewed by collaborators.
+	•	Usage: They facilitate code review, discussion, and integration of changes into the main branch. ￼
+
+Issues
+	•	Definition: Issues are used to track tasks, enhancements, bugs, and other requests.
+	•	Usage: They help in project management and can be linked to pull requests and commits.
+
+GitHub Actions
+	•	Definition: GitHub Actions is a CI/CD platform that allows you to automate your build, test, and deployment pipeline.
+	•	Usage: You can write individual tasks, called actions, and combine them to create a workflow.
+
+Common Workflows
+
+GitHub Flow
+	1.	Create a Branch: Start by creating a new branch for your work.
+	2.	Make Changes: Commit changes to your branch.
+	3.	Open a Pull Request: Submit a pull request to propose your changes.
+	4.	Discuss and Review: Collaborate and review the pull request.
+	5.	Merge: Once approved, merge the pull request into the main branch.
+	6.	Deploy: Deploy the changes to production if applicable. ￼ ￼ ￼
+
+Best Practices
+	•	Write Clear Commit Messages: Use concise and descriptive commit messages to make the history easy to understand.
+	•	Use Branch Protection Rules: Protect important branches by enforcing checks and reviews before merging.
+	•	Keep Branches Up to Date: Regularly sync your branches with the main branch to avoid merge conflicts.
+	•	Review Pull Requests Thoroughly: Ensure code quality and consistency by conducting comprehensive code reviews.
+	•	Automate with GitHub Actions: Implement CI/CD pipelines to automate testing and deployment processes. ￼
+
+Sample Commands
+
+# Clone a repository
+git clone https://github.com/username/repository.git
+
+# Create and switch to a new branch
+git checkout -b feature-branch
+
+# Stage changes
+git add .
+
+# Commit changes
+git commit -m "Add new feature"
+
+# Push changes to GitHub
+git push origin feature-branch
+
+Resources
+	•	GitHub Docs
+	•	GitHub Learning Lab
+	•	GitHub Actions Documentation
+
+⸻
+

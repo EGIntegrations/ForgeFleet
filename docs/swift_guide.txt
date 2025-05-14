@@ -1,0 +1,311 @@
+Understood! Here is your comprehensive swift_guide.txt, intended specifically as an instructional document for the Swift agent only, containing detailed explanations about Swift coding:
+
+
+swift_guide.txt
+
+Swift Programming Language Guide (Agent Reference Only)
+
+
+Introduction to Swift
+
+Swift is a modern, type-safe, multi-paradigm programming language developed by Apple for iOS, macOS, watchOS, and tvOS app development. Swift is known for its readability, safety, and efficiency.
+
+
+Core Concepts and Syntax
+
+Variables and Constants
+	•	Use var for variables and let for constants.
+
+var name = "John"
+let age = 25
+
+
+
+Type Annotations and Inference
+	•	Swift supports type inference, but annotations can provide clarity:
+
+let username: String = "agent_007"
+var score: Int = 100
+
+
+
+Basic Data Types
+	•	Integers (Int)
+	•	Floating-point numbers (Double, Float)
+	•	Boolean (Bool)
+	•	Strings (String)
+
+Examples:
+
+var height: Double = 175.5
+var activeUser: Bool = true
+
+
+
+Strings
+	•	Swift strings support interpolation:
+
+let greeting = "Hello, \(name)! You are \(age) years old."
+
+
+
+Control Flow
+
+Conditional Statements
+	•	if, else if, else
+
+if score > 90 {
+    print("Excellent!")
+} else if score > 75 {
+    print("Good job!")
+} else {
+    print("Keep trying!")
+}
+
+	•	switch statement for multiple branches:
+
+switch score {
+case 90...100:
+    print("Excellent")
+case 75..<90:
+    print("Good")
+default:
+    print("Needs improvement")
+}
+
+
+
+Loops
+	•	for-in loop:
+
+for number in 1...5 {
+    print("Number: \(number)")
+}
+
+	•	while and repeat-while loops:
+
+var count = 0
+while count < 5 {
+    print("Count: \(count)")
+    count += 1
+}
+
+repeat {
+    print("Count: \(count)")
+    count -= 1
+} while count > 0
+
+
+
+Functions and Closures
+
+Functions
+	•	Basic function syntax:
+
+func greet(person: String) -> String {
+    return "Hello, \(person)!"
+}
+
+print(greet(person: "Alice"))
+
+	•	Functions with multiple parameters:
+
+func add(_ a: Int, to b: Int) -> Int {
+    return a + b
+}
+
+print(add(5, to: 3))
+
+
+
+Closures
+	•	Closures are anonymous functions:
+
+let numbers = [1, 2, 3, 4, 5]
+let squared = numbers.map { number in
+    number * number
+}
+
+	•	Simplified closure syntax:
+
+let sortedNumbers = numbers.sorted(by: >)
+
+
+
+Structs and Classes
+
+Structs
+	•	Value type, automatically copied on assignment:
+
+struct Point {
+    var x: Double
+    var y: Double
+}
+
+let p = Point(x: 10, y: 20)
+
+Classes
+	•	Reference type, supports inheritance:
+
+class Vehicle {
+    var speed: Double
+
+    init(speed: Double) {
+        self.speed = speed
+    }
+
+    func drive() {
+        print("Driving at \(speed) mph")
+    }
+}
+
+class Car: Vehicle {
+    var brand: String
+
+    init(speed: Double, brand: String) {
+        self.brand = brand
+        super.init(speed: speed)
+    }
+
+    override func drive() {
+        print("Driving a \(brand) at \(speed) mph")
+    }
+}
+
+let car = Car(speed: 70, brand: "Tesla")
+car.drive()
+
+
+
+Optionals and Unwrapping
+	•	Optional types can contain a value or nil:
+
+var optionalName: String? = "Agent Smith"
+optionalName = nil
+
+Safe unwrapping with optional binding:
+
+if let name = optionalName {
+    print("Hello, \(name)")
+} else {
+    print("No name provided.")
+}
+
+Force unwrap (use carefully):
+
+let unwrappedName = optionalName!
+
+
+
+Error Handling
+	•	Define custom errors:
+
+enum FileError: Error {
+    case notFound
+    case unreadable
+}
+
+	•	Throwing functions:
+
+func readFile(named fileName: String) throws -> String {
+    guard fileName != "" else {
+        throw FileError.notFound
+    }
+    return "file contents"
+}
+
+	•	Handling errors with do-catch:
+
+do {
+    let contents = try readFile(named: "notes.txt")
+    print(contents)
+} catch FileError.notFound {
+    print("File not found.")
+} catch {
+    print("Unknown error.")
+}
+
+
+
+Protocols and Extensions
+	•	Protocols define blueprints for methods and properties:
+
+protocol Drivable {
+    func drive()
+}
+
+struct Bike: Drivable {
+    func drive() {
+        print("Biking around")
+    }
+}
+
+	•	Extensions add functionality to existing types:
+
+extension String {
+    func shout() -> String {
+        return self.uppercased() + "!"
+    }
+}
+
+print("hello".shout()) // Outputs "HELLO!"
+
+
+
+Memory Management (ARC)
+	•	Swift uses Automatic Reference Counting (ARC) to manage memory:
+	•	Ensure no strong reference cycles by using weak or unowned references.
+
+class Person {
+    var name: String
+    weak var apartment: Apartment?
+
+    init(name: String) {
+        self.name = name
+    }
+}
+
+
+
+Swift Standard Library and SwiftUI
+	•	The Swift Standard Library includes:
+	•	Collections (Array, Set, Dictionary)
+	•	Higher-order functions (map, filter, reduce)
+
+Example:
+
+let filtered = [1, 2, 3, 4, 5].filter { $0 > 3 }
+
+	•	SwiftUI for UI development:
+	•	Declarative UI framework
+
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            Text("Hello, SwiftUI!")
+                .padding()
+            Button("Tap me") {
+                print("Tapped!")
+            }
+        }
+    }
+}
+
+
+
+Best Practices
+	•	Favor immutability (let) over mutability (var) whenever possible.
+	•	Use meaningful, clear variable and function names.
+	•	Avoid force-unwrapping optionals unless absolutely certain of non-nil state.
+	•	Leverage Swift’s safety features, like type inference and automatic reference counting.
+
+
+Swift Version and Platform Support
+	•	Swift is currently at version 5.10 (as of early 2025).
+	•	Ensure compatibility across iOS, macOS, tvOS, watchOS by reviewing Apple’s latest SDK documentation.
+
+
+Swift Agent Reminder: Always reference this guide thoroughly before providing Swift assistance. Maintain accurate syntax, provide clean and idiomatic solutions, and adhere strictly to best practices outlined here.
+

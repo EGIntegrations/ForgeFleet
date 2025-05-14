@@ -10,10 +10,11 @@ from jinja2 import Environment, FileSystemLoader
 # ─── Redis ──────────────────────────────────────────────────────────────
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 r         = aioredis.from_url(REDIS_URL, decode_responses=True)
-AGENTS = os.getenv("AGENTS", "DemoAgent,SupportAgent,SwiftAgent").split(",")
+
+AGENTS = os.getenv("AGENTS", "DemoAgent,SupportAgent,SwiftAgent,GitAgent").split(",")
 AGENTS = [a.strip() for a in AGENTS if a.strip()]
 
-# build one Redis list per agent      <─── add / restore this
+# 👇 THIS must be present *before* any route that uses it
 SUG_KEYS = {a: f"suggestions:{a}" for a in AGENTS}
 
 # ─── GitHub settings ( .env ) ───────────────────────────────────────────
@@ -92,17 +93,29 @@ async def _publish(txt: str):
 
 @app.get("/suggestions/json", response_class=JSONResponse)
 async def suggestions_json():
-    """Return *all* suggestions (newest first) from every agent queue."""
-    items: list[str] = []
-    for key in SUG_KEYS.values():                      # loop all agent keys
-        items.extend(await r.lrange(key, 0, -1))
-    return [json.loads(x) for x in items[::-1]]        # oldest → newest
+    """
+    Return *all* pending suggestions – anything that’s still in the old
+    global list called  “suggestions” *plus* anything in the new
+    per‑agent lists, e.g.  suggestions:SwiftAgent, suggestions:DemoAgent …
+    """
+    # the legacy list:
+    keys = ["suggestions"]
 
-# ─── accept / reject endpoints ──────────────────────────────────────────
+    # the new per‑agent lists:
+    keys += list(SUG_KEYS.values())
+
+    items: list[str] = []
+    for k in keys:
+        items.extend(await r.lrange(k, 0, -1))
+
+    # newest first
+    return [json.loads(x) for x in items[::-1]]
+
+
+# ─── accept a suggestion ────────────────────────────────────────────────
 @app.post("/suggestions/{sid}/accept", response_class=JSONResponse)
 async def accept_suggestion(sid: str):
-    """Pop the suggestion, write the file, git‑commit, push, live‑log ✅."""
-    for key in SUG_KEYS.values():                      # search every agent list
+    for key in SUG_KEYS.values():                     # search every list
         for raw in await r.lrange(key, 0, -1):
             s = json.loads(raw)
             if s["id"] != sid:
@@ -113,23 +126,29 @@ async def accept_suggestion(sid: str):
             fp.write_text(s["content"], encoding="utf-8")
 
             if REMOTE_URL:
-                rel = str(fp.relative_to(REPO_ROOT))
+                rel   = str(fp.relative_to(REPO_ROOT))
+                stamp = dt.datetime.utcnow().strftime("%Y‑%m‑%d %H:%M:%S")
                 _git_safe("add", rel)
-                stamp = dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 _git_safe("commit", "-m", f"{stamp} ✅ {rel}")
                 _git_safe("push", "origin", "main")
 
+            # remove the accepted item and notify
             await r.lrem(key, 1, raw)
             await _publish(f"✅ accepted {sid} — pushed {s['path']}")
             return {"status": "ok"}
+
     return {"status": "not-found"}
 
+
+# ─── reject a suggestion ────────────────────────────────────────────────
 @app.post("/suggestions/{sid}/reject", response_class=JSONResponse)
 async def reject_suggestion(sid: str):
     for key in SUG_KEYS.values():
         for raw in await r.lrange(key, 0, -1):
-            if json.loads(raw)["id"] == sid:
+            s = json.loads(raw)
+            if s["id"] == sid:
                 await r.lrem(key, 1, raw)
                 await _publish(f"🛑 rejected {sid}")
                 return {"status": "ok"}
+
     return {"status": "not-found"}

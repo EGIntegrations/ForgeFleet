@@ -1,0 +1,18 @@
+ForgeFleet Support Guide
+========================
+
+Welcome to the ForgeFleet support system.
+
+Common Issues:
+- Redis queue not processing
+- Agent not responding
+- API key authentication errors
+- Assistant creation failures
+
+Standard Solutions:
+- Restart orchestrator container.
+- Check environment variables (.env).
+- Verify OpenAI API Key permissions.
+- Ensure correct file uploads to vector store.
+
+For further help, contact the ForgeFleet Engineering Team.

@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   db:
     image: ankane/pgvector:latest
@@ -19,13 +21,61 @@ services:
       dockerfile: Dockerfile
     restart: always
     env_file: ../.env
-    depends_on: [db, redis]
+    environment:
+      OPENAI_API_KEY: ${SUPPORT_AGENT_API_KEY}
+    depends_on:
+      - db
+      - redis
 
-  ui:
-    build: ../ui
+  swift-orchestrator:
+    build:
+      context: ../orchestrator
+      dockerfile: Dockerfile
     restart: always
     env_file: ../.env
-    depends_on: [orchestrator]
+    environment:
+      OPENAI_API_KEY: ${SWIFT_AGENT_API_KEY}
+    command: ["python", "-m", "orchestrator.swift_expert"]
+    depends_on:
+      - db
+      - redis
+
+  git-orchestrator:
+    build:
+      context: ../orchestrator
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ../.env
+    environment:
+      OPENAI_API_KEY: ${GIT_AGENT_API_KEY}
+    command: ["python", "-m", "orchestrator.git_expert"]
+    depends_on:
+      - db
+      - redis
+
+  support-orchestrator:
+    build:
+      context: ../orchestrator
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ../.env
+    environment:
+      OPENAI_API_KEY: ${SUPPORT_AGENT_API_KEY}
+    command: ["python", "-m", "orchestrator.support_worker"]
+    depends_on:
+      - db
+      - redis
+
+  ui:
+    build:
+      context: ../ui
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ../.env
+    depends_on:
+      - orchestrator
+      - swift-orchestrator
+      - support-orchestrator
     expose:
       - "8000"
 
@@ -38,7 +88,8 @@ services:
     volumes:
       - ../Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
-    depends_on: [ui]
+    depends_on:
+      - ui
 
 volumes:
   db_data:

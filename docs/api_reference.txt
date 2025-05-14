@@ -1,0 +1,26 @@
+ForgeFleet API Reference
+=========================
+
+Endpoints:
+
+1. Create Task
+POST /api/tasks/create
+- Description: Creates a new task for an agent.
+- Body: { "agent_id": "string", "task": "string" }
+
+2. Fetch Logs
+GET /api/logs/{agent_id}
+- Description: Retrieves recent logs for a given agent.
+
+3. Upload Knowledge File
+POST /api/knowledge/upload
+- Description: Uploads a new file to the agent's vector storage.
+- Body: { "file": "binary", "agent_id": "string" }
+
+Authentication:
+- API Key (passed as Authorization header)
+
+Errors:
+- 401 Unauthorized
+- 404 Not Found
+- 500 Internal Server Error

@@ -1,0 +1,5 @@
+fastapi==0.111.0
+uvicorn[standard]==0.29.0          # already includes websockets, click, etc.
+aiohttp==3.9.5                     # ← NEW – enables FastAPI’s WebSocket polling
+jinja2==3.1.4
+redis==5.0.4
