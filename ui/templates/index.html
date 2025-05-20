@@ -1,5 +1,5 @@
 {# ☞ DROP THIS FILE INTO ui/templates/index.html #}
-{% set AGENTS = ['DemoAgent','SupportAgent','SwiftAgent','GitAgent'] %}                 {# 1‑line Jinja #}
+{% set AGENTS = ['DemoAgent','SupportAgent','SwiftAgent','GitAgent','PlannerAgent'] %}                 {# 1‑line Jinja #}
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ForgeFleet - AI Agent Dashboard</title>
@@ -92,6 +92,19 @@
     </div>
     <div id="sugGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
   </div>
+
+<!-- Gantt Dashboard -->
+<div class="bg-dark-800 rounded-xl border border-dark-700 p-4 lg:col-span-3 mt-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-semibold text-primary-300 flex items-center">
+      <i class="fas fa-project-diagram mr-2"></i> Project Scope
+    </h2>
+    <button onclick="loadGantt()" class="px-3 py-1 bg-dark-700 hover:bg-dark-600 rounded-md text-xs">
+      <i class="fas fa-sync-alt mr-1"></i>Refresh
+    </button>
+  </div>
+  <div id="ganttChart" class="overflow-x-auto text-sm text-gray-300 font-mono"></div>
+</div>
 
 </div></main>
 

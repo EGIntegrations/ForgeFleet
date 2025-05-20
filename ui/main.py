@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 r         = aioredis.from_url(REDIS_URL, decode_responses=True)
 
-AGENTS = os.getenv("AGENTS", "DemoAgent,SupportAgent,SwiftAgent,GitAgent").split(",")
+AGENTS = os.getenv("AGENTS", "DemoAgent,SupportAgent,SwiftAgent,GitAgent,PlannerAgent").split(",")
 AGENTS = [a.strip() for a in AGENTS if a.strip()]
 
 # 👇 THIS must be present *before* any route that uses it
@@ -115,30 +115,32 @@ async def suggestions_json():
 # ─── accept a suggestion ────────────────────────────────────────────────
 @app.post("/suggestions/{sid}/accept", response_class=JSONResponse)
 async def accept_suggestion(sid: str):
-    for key in SUG_KEYS.values():                     # search every list
+    for key in SUG_KEYS.values():  # search every agent list
         for raw in await r.lrange(key, 0, -1):
             s = json.loads(raw)
             if s["id"] != sid:
                 continue
+
+            # === NEW: auto-confirm logic ===
+            if s.get("agent") == "PlannerAgent" and "AUTO_APPROVE" in s.get("note", ""):
+                sid = s["id"]  # override to match the found suggestion
 
             fp = REPO_ROOT / s["path"]
             fp.parent.mkdir(parents=True, exist_ok=True)
             fp.write_text(s["content"], encoding="utf-8")
 
             if REMOTE_URL:
-                rel   = str(fp.relative_to(REPO_ROOT))
+                rel = str(fp.relative_to(REPO_ROOT))
                 stamp = dt.datetime.utcnow().strftime("%Y‑%m‑%d %H:%M:%S")
                 _git_safe("add", rel)
                 _git_safe("commit", "-m", f"{stamp} ✅ {rel}")
                 _git_safe("push", "origin", "main")
 
-            # remove the accepted item and notify
             await r.lrem(key, 1, raw)
             await _publish(f"✅ accepted {sid} — pushed {s['path']}")
             return {"status": "ok"}
 
     return {"status": "not-found"}
-
 
 # ─── reject a suggestion ────────────────────────────────────────────────
 @app.post("/suggestions/{sid}/reject", response_class=JSONResponse)

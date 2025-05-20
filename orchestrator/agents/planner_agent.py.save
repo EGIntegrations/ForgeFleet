@@ -1,0 +1,58 @@
+# orchestrator/agents/planner_agent.py
+"""
+PlannerAgent – breaks a project brief into agent‑specific jobs.
+Queues them to Redis, keeping your existing approval pipeline intact.
+"""
+from __future__ import annotations
+import os, json, time, uuid, inspect
+from typing import Any, Dict, List
+from redis import Redis
+
+from orchestrator.agents.openai_agents import AssistantAgent
+
+# ── config ─────────────────────────────────────────────────────────────
+VECTOR_ID = os.getenv("PLANNER_VECTOR_ID")
+if not VECTOR_ID:
+    raise RuntimeError("Set PLANNER_VECTOR_ID in .env")
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+redis_sync = Redis.from_url(REDIS_URL, decode_responses=True)
+
+# helper: enqueue a job for another agent
+
+# convert Python tools → OpenAI function‑call schema
+def to_schema(fn) -> Dict[str, Any]:
+    sig, props, req = inspect.signature(fn), {}, []
+    for name, prm in sig.parameters.items():
+        props[name] = {"type": "string"}
+        if prm.default is inspect._empty:
+            req.append(name)
+    return {
+        "type": "function",
+        "function": {
+            "name": fn.__name__,
+            "description": (fn.__doc__ or fn.__name__).strip(),
+            "parameters": {"type": "object", "properties": props, "required": req},
+        },
+    }
+
+TOOLS            = [enqueue_job]
+FUNCTION_SCHEMAS = [to_schema(t) for t in TOOLS]
+
+planner_agent = AssistantAgent(
+    name         = "PlannerAgent",
+    model        = "o4-mini-2025-04-16",          # use the premium model
+	instructions = (
+    	    "You are ForgeFleet’s high‑level project planner.\n"
+            "1. Ask the user clarifying questions until you fully understand the project.\n"
+            "2. Design the architecture, folder structure, and deliverables.\n"
+    "3. Break the work into concrete jobs.\n"
+    "4. For code and dev work, assign to GitAgent; for tests, use SwiftAgent; "
+    "for support-related tasks, use SupportAgent. Spread the work logically.\n"
+    "5. Use enqueue_job(agent, input, note, priority, status, depends_on) "
+    "to queue the work and include metadata for visual tracking.\n"
+    "Respond with function calls only once the scope is complete."
+).
+    tools        = TOOLS,
+    functions    = FUNCTION_SCHEMAS,
+)

@@ -82,3 +82,29 @@ document.getElementById("taskSend").addEventListener("click",()=>{
   });
   box.value="";
 });
+
+async function loadGantt(){
+  const list = await (await fetch("/suggestions/json")).json();
+  let rows = list.map(s => {
+    const m = s.meta || {};
+    return `<tr>
+      <td class="border-b border-dark-600 px-2 py-1">${s.path}</td>
+      <td class="border-b border-dark-600 px-2 py-1">${m.priority || '—'}</td>
+      <td class="border-b border-dark-600 px-2 py-1">${m.status || '—'}</td>
+      <td class="border-b border-dark-600 px-2 py-1">${m.depends_on || '—'}</td>
+    </tr>`;
+  }).join("");
+
+  document.getElementById("ganttChart").innerHTML = `
+    <table class="w-full text-left">
+      <thead>
+        <tr class="text-primary-400 border-b border-dark-600">
+          <th class="px-2 py-1">File</th>
+          <th class="px-2 py-1">Priority</th>
+          <th class="px-2 py-1">Status</th>
+          <th class="px-2 py-1">Depends On</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}

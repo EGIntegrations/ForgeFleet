@@ -14,6 +14,9 @@ LOG        = "logs:PlannerAgent"
 
 client = oa("PLANNER_AGENT_API_KEY")
 
+# persistent memory across prompts
+history: list[dict[str, str]] = []
+
 async def log(event):
     await redis.publish(LOG, json.dumps(event))
 
@@ -25,41 +28,58 @@ async def main():
             await asyncio.sleep(1)
             continue
 
-        job = json.loads(raw)
-        utext = job.get("input", "")
-
-        await log({"type": "message",
-                   "data": json.dumps({"role": "user", "content": utext})})
-
         try:
+            job = json.loads(raw)
+            utext = job.get("input", "").strip()
+            history.append({"role": "user", "content": utext})
+
+            await log({
+                "type": "message",
+                "data": json.dumps({"role": "user", "content": utext})
+            })
+
+            # model call with full chat history
             resp = client.chat.completions.create(
-                model   = planner_agent.model,
-                messages=[{"role":"system","content": planner_agent.instructions},
-                          {"role":"user"  ,"content": utext}],
-                tools      = planner_agent.functions,
-                tool_choice= "auto",
+                model        = planner_agent.model,
+                messages     = [{"role": "system", "content": planner_agent.instructions}] + history,
+                tools        = planner_agent.functions,
+                tool_choice  = "auto",
             )
-            msg  = resp.choices[0].message
-            await log({"type":"message",
-                       "data": json.dumps({"assistant": msg.dict()})})
+
+            msg = resp.choices[0].message
+            history.append({"role": "assistant", "content": msg.content or ""})
+
+            await log({
+                "type": "message",
+                "data": json.dumps({"assistant": msg.model_dump()})
+            })
 
             if not msg.tool_calls:
-                await log({"type":"message",
-                           "data": json.dumps({"error":"no function call"})})
+                await log({
+                    "type": "message",
+                    "data": json.dumps({"error": "no function call"})
+                })
                 continue
 
-            call = msg.tool_calls[0]
-            result = await Runner.run(planner_agent,
-                                      input={"name": call.function.name,
-                                             "args": json.loads(call.function.arguments)})
-            await log({"type":"message",
-                       "data": json.dumps({"tool_result": result["final_output"]})})
+            # support multiple calls in one reply
+            for call in msg.tool_calls:
+                result = await Runner.run(planner_agent, {
+                    "name": call.function.name,
+                    "args": json.loads(call.function.arguments),
+                })
+
+                await log({
+                    "type": "message",
+                    "data": json.dumps({"tool_result": result["final_output"]})
+                })
 
         except Exception as e:
             tb = traceback.format_exc()
-            print("‼️ Planner fail:\n", tb, flush=True)
-            await log({"type":"message",
-                       "data": json.dumps({"error": str(e)})})
+            print("‼️ PlannerAgent failed:\n", tb, flush=True)
+            await log({
+                "type": "message",
+                "data": json.dumps({"error": str(e)})
+            })
 
 if __name__ == "__main__":
     asyncio.run(main())
